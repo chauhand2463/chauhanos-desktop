@@ -4,7 +4,7 @@ A modern desktop application built with React, TypeScript, and Vite.
 
 ## 🚀 Live Demo
 
-**Check out the live application**: [https://chauhanos-desktop.vercel.app/](https://chauhanos-desktop.vercel.app/)
+**Check out the live application**: [https://dhairy-chauhan-portfolio.vercel.app/
 
 ## 📋 Project Overview
 
