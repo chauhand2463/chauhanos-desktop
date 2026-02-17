@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type AppId = 'about' | 'projects' | 'skills' | 'terminal' | 'contact' | 'resume' | 'browser' | 'settings';
+export type AppId = 'about' | 'projects' | 'skills' | 'terminal' | 'contact' | 'resume' | 'browser' | 'settings' | 'github';
 
 export interface WindowState {
   id: AppId;
