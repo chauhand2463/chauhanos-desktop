@@ -3,67 +3,92 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDesktopStore } from '@/store/useDesktopStore';
 
 const BIOS_SPECS = [
-  "ARCHBOOT(C)2026 Chauhan Dynamics",
-  "ChauhanOS Arch-Core Revision 3.1.0",
-  "CPU: Dhairy Chauhan Core(TM) i9-X Extreme @ 5.80GHz",
-  "Speed: 5800MHz  Count: 16",
-  "Memory Test: 65536MB OK",
+  "AMIBIOS(C)2026 Chauhan Dynamics Tech Inc.",
+  "ChauhanOS Low-Level Architecture v3.1.0-PRO",
+  "CPU: Chauhan Core(TM) i9-X Extreme @ 5.80GHz",
+  "Speed: 5800MHz  Core Count: 16  Threads: 32",
+  "Memory Test: 65536MB OK (L1/L2/L3 Cache Valid)",
+  "PCI Device Listing...",
+  "Bus# Dev# Fun# VendorID DeviceID Class",
+  "00    01   00   8086     1901     Display Controller",
+  "00    14   00   8086     A12F     USB 3.0 Controller",
+  "00    1F   02   8086     A102     SATA Controller",
+  "Initializing NVMe Storage... Found 1 Device",
+  "Checking for bootable media...",
 ];
 
 const KERNEL_LOGS = [
-  { text: "[  OK  ] Started User Login Management.", delay: 0 },
+  { text: "[  0.000000] Linux version 6.5.0-arch1-1 (gcc version 13.2.1)", delay: 0 },
+  { text: "[  0.000342] Command line: root=PARTUUID=... quiet rw splash", delay: 10 },
+  { text: "[  0.124512] x86/fpu: Supporting XSAVE feature set: 0x2ff", delay: 20 },
+  { text: "[  0.451231] ACPI: Core revision 20230331", delay: 30 },
+  { text: "[  OK  ] Started User Login Management.", delay: 40 },
   { text: "[  OK  ] Reached target Remote File Systems.", delay: 50 },
-  { text: "[  OK  ] Started Network Manager Scripting Service.", delay: 100 },
-  { text: "[  OK  ] Reached target System Initialization.", delay: 150 },
-  { text: "[  OK  ] Started D-Bus System Message Bus.", delay: 200 },
-  { text: "[  OK  ] Started Authorization Manager.", delay: 250 },
-  { text: "[  OK  ] Reached target Paths.", delay: 300 },
-  { text: "[  OK  ] Started Modem Manager.", delay: 350 },
-  { text: "[  OK  ] Reached target Basic System.", delay: 400 },
-  { text: "[  OK  ] Started TLP system startup/shutdown.", delay: 450 },
-  { text: "[  OK  ] Started User Manager for UID 1000.", delay: 500 },
-  { text: "[  OK  ] Started Session 1 of User dk-chauhan.", delay: 550 },
-  { text: "[  OK  ] Reached target Graphical Interface.", delay: 600 },
-  { text: "Starting ChauhanOS Desktop Environment...", delay: 650 },
+  { text: "[  OK  ] Started Network Manager Scripting Service.", delay: 60 },
+  { text: "[  OK  ] Reached target System Initialization.", delay: 70 },
+  { text: "[  OK  ] Started D-Bus System Message Bus.", delay: 80 },
+  { text: "[  OK  ] Started Authorization Manager.", delay: 90 },
+  { text: "[  OK  ] Reached target Paths.", delay: 100 },
+  { text: "[  OK  ] Started Modem Manager.", delay: 110 },
+  { text: "[  OK  ] Reached target Basic System.", delay: 120 },
+  { text: "[  OK  ] Started TLP system startup/shutdown.", delay: 130 },
+  { text: "[  OK  ] Started User Manager for UID 1000.", delay: 140 },
+  { text: "[  OK  ] Started Session 1 of User dk-chauhan.", delay: 150 },
+  { text: "[  OK  ] Reached target Graphical Interface.", delay: 160 },
+  { text: "Mounting /home Partition... DONE", delay: 170 },
 ];
 
-const ArchLogo = () => (
-  <svg viewBox="0 0 100 100" className="w-32 h-32 mb-8 fill-current text-primary drop-shadow-[0_0_20px_hsla(var(--primary),0.6)]">
-    <path d="M50 10 L90 85 L75 85 L50 40 L25 85 L10 85 Z" fill="currentColor" />
-    <path d="M50 30 L65 70 L35 70 Z" fill="black" opacity="0.4" />
-    <path d="M50 10 L10 85 L90 85 Z" fill="none" stroke="currentColor" strokeWidth="2" strokeOpacity="0.5" />
-  </svg>
-);
+const DE_INIT_LOGS = [
+  "Initializing Chauhan Window Manager v3.1...",
+  "Loading Wayland session parameters...",
+  "Fetching user configuration from /etc/chauhanos/config.json",
+  "Starting PulseAudio Sound Service...",
+  "Loading Wallpapers & Assets...",
+  "Mounting Neural Workspace Architecture...",
+  "Environment READY. Launching Desktop...",
+];
 
-const TuxLogo = () => (
-  <div className="absolute top-8 right-8 mix-blend-screen opacity-40">
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor" className="text-primary">
-      <path d="M20 2c-5 0-9 4-9 9 0 2 1 4 2 6-1 2-2 4-2 7 0 6 4 9 9 9s9-3 9-9c0-3-1-5-2-7 1-2 2-4 2-6 0-5-4-9-9-9zm-3 8c1 0 2 1 2 2s-1 2-2 2-2-1-2-2 1-2 2-2zm6 0c1 0 2 1 2 2s-1 2-2 2-2-1-2-2 1-2 2-2z" />
-    </svg>
-  </div>
-);
+const ArchASCII = `
+      /\\
+     /  \\
+    /\\   \\
+   /      \\
+  /   ,,   \\
+ /   |  |   \\
+/_-''    ''-_\\
+`;
+
+const TuxASCII = `
+    .--.
+   |o_o |
+   |:_/ |
+  //   \\ \\
+ (|     | )
+/\\'\\_   _/ \`\\
+\\___)=(___/
+`;
 
 interface BootScreenProps {
   onComplete: () => void;
 }
 
-type BootPhase = 'BIOS' | 'KERNEL' | 'WORKSPACE' | 'REVEAL';
+type BootPhase = 'BIOS' | 'KERNEL' | 'LOGIN' | 'GRAYSWITCH' | 'REVEAL';
 
 const BootScreen = ({ onComplete }: BootScreenProps) => {
   const { settings } = useDesktopStore();
   const [phase, setPhase] = useState<BootPhase>('BIOS');
   const [biosIndex, setBiosIndex] = useState(0);
   const [kernelIndex, setKernelIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [loginStep, setLoginStep] = useState(0);
+  const [deInitIndex, setDeInitIndex] = useState(0);
   const [isDone, setIsDone] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll kernel logs
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [kernelIndex]);
+  }, [kernelIndex, deInitIndex, phase]);
 
   // BIOS Phase
   useEffect(() => {
@@ -71,22 +96,22 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
       const fullBios = [
         ...BIOS_SPECS,
         ...settings.bootLogs,
-        "Mounting /dev/sda1 on /boot...",
-        "Loading vmlinuz-linux...",
-        "Loading initial ramdisk...",
-        "Arch Linux 6.5.0-arch1-1 (tty1)",
+        "GRUB Loading stage 1.5.",
+        "GRUB loading, please wait...",
+        "Loading kernel linux ...",
+        "Loading initial ramdisk ...",
       ];
 
       const interval = setInterval(() => {
         setBiosIndex(prev => {
           if (prev >= fullBios.length - 1) {
             clearInterval(interval);
-            setTimeout(() => setPhase('KERNEL'), 800);
+            setTimeout(() => setPhase('KERNEL'), 500);
             return prev;
           }
           return prev + 1;
         });
-      }, 35);
+      }, 40);
       return () => clearInterval(interval);
     }
   }, [phase, settings.bootLogs]);
@@ -98,34 +123,55 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
         setKernelIndex(prev => {
           if (prev >= KERNEL_LOGS.length - 1) {
             clearInterval(interval);
-            setTimeout(() => setPhase('WORKSPACE'), 800);
+            setTimeout(() => setPhase('LOGIN'), 400);
             return prev;
           }
           return prev + 1;
         });
-        setProgress(prev => {
-          const next = prev + (Math.random() * 10 + 2);
-          return Math.min(next, 100);
-        });
-      }, 120);
+      }, 80);
       return () => clearInterval(interval);
     }
   }, [phase]);
 
-  // WORKSPACE Phase
+  // LOGIN Phase
   useEffect(() => {
-    if (phase === 'WORKSPACE') {
-      setTimeout(() => setPhase('REVEAL'), 600);
+    if (phase === 'LOGIN') {
+      const timers = [
+        setTimeout(() => setLoginStep(1), 800),  // Show prompt
+        setTimeout(() => setLoginStep(2), 1600), // Type username
+        setTimeout(() => setLoginStep(3), 2200), // Show password prompt
+        setTimeout(() => setLoginStep(4), 3000), // Type password
+        setTimeout(() => setLoginStep(5), 3600), // Welcome msg
+        setTimeout(() => setPhase('GRAYSWITCH'), 4400),
+      ];
+      return () => timers.forEach(clearTimeout);
     }
   }, [phase]);
 
-  // Final Transition
+  // Transition Phase (Simulating video mode switch)
+  useEffect(() => {
+    if (phase === 'GRAYSWITCH') {
+      setTimeout(() => setPhase('REVEAL'), 200);
+    }
+  }, [phase]);
+
+  // REVEAL Phase (DE Initialization)
   useEffect(() => {
     if (phase === 'REVEAL') {
-      setTimeout(() => {
-        setIsDone(true);
-        setTimeout(onComplete, 1200);
-      }, 3000);
+      const interval = setInterval(() => {
+        setDeInitIndex(prev => {
+          if (prev >= DE_INIT_LOGS.length - 1) {
+            clearInterval(interval);
+            setTimeout(() => {
+              setIsDone(true);
+              setTimeout(onComplete, 800);
+            }, 1500);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 400);
+      return () => clearInterval(interval);
     }
   }, [phase, onComplete]);
 
@@ -138,155 +184,156 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
     <AnimatePresence>
       {!isDone && (
         <motion.div
-          className="fixed inset-0 z-[100] bg-[#0c0c0c] text-primary font-mono selection:bg-primary/30 overflow-hidden"
+          className="fixed inset-0 z-[100] bg-black text-[#d0d0d0] font-mono selection:bg-primary/30 overflow-hidden"
           exit={{
             opacity: 0,
-            scale: 1.05,
-            filter: "brightness(1.5) blur(30px)",
-            transition: { duration: 0.8, ease: "circIn" }
+            transition: { duration: 0.4 }
           }}
         >
-          {/* Subtle Visual Overlays */}
-          <div className="absolute inset-0 pointer-events-none noise-overlay opacity-10" />
-          <div className="absolute inset-0 pointer-events-none opacity-20 crt-overlay" />
-          <div className="absolute inset-0 scanline opacity-20 pointer-events-none" />
+          {/* Enhanced CRT Effects */}
+          <div className="absolute inset-0 pointer-events-none noise-overlay opacity-5" />
+          <div className="absolute inset-0 pointer-events-none opacity-30 crt-overlay" />
+          <div className="absolute inset-0 scanline opacity-30 pointer-events-none" />
 
-          <TuxLogo />
-
-          <div className="relative h-full flex flex-col p-8 md:p-16 max-w-5xl mx-auto">
-
-            {/* Header / Brand */}
-            <div className="flex justify-between items-start mb-12 opacity-40 text-[10px] tracking-[0.3em] uppercase">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_hsl(var(--primary))]" />
-                ARCH_CORE v2026.02
-              </div>
-              <div>STATION: PORTFOLIO-01</div>
-            </div>
-
-            {/* Phase 1: BIOS */}
-            {phase === 'BIOS' && (
-              <div className="space-y-1.5">
-                <div className="text-white/90 mb-8 text-lg font-bold tracking-widest">
-                  [ ARCH_BOOT_LOADER ]
-                </div>
-                {[...BIOS_SPECS, ...settings.bootLogs, "Mounting /dev/sda1 on /boot...", "Loading vmlinuz-linux...", "Loading initial ramdisk...", "Arch Linux 6.5.0-arch1-1 (tty1)"].slice(0, biosIndex + 1).map((line, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -5 }}
-                    animate={{ opacity: 0.7, x: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="text-xs md:text-sm"
-                  >
+          {/* Phase: BIOS */}
+          {phase === 'BIOS' && (
+            <div className="p-4 md:p-8 space-y-1">
+              <pre className="text-primary opacity-80 mb-6 leading-none text-[10px] md:text-xs">
+                {TuxASCII}
+              </pre>
+              <div className="space-y-0.5">
+                {[...BIOS_SPECS, ...settings.bootLogs, "GRUB Loading stage 1.5.", "GRUB loading, please wait...", "Loading kernel linux ...", "Loading initial ramdisk ..."].slice(0, biosIndex + 1).map((line, i) => (
+                  <div key={i} className="text-[10px] md:text-sm tracking-tight opacity-90">
                     {line}
-                  </motion.div>
+                  </div>
                 ))}
-                <span className="inline-block w-2.5 h-4.5 bg-primary animate-pulse ml-1 mt-3" />
+                <span className="inline-block w-2 h-4 bg-primary/80 animate-pulse" />
               </div>
-            )}
-
-            {/* Phase 2: KERNEL */}
-            {phase === 'KERNEL' && (
-              <div className="flex-1 flex flex-col">
-                <div
-                  ref={scrollRef}
-                  className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col justify-end mb-12 scroll-smooth no-scrollbar"
-                >
-                  {KERNEL_LOGS.slice(0, kernelIndex + 1).map((line, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -3 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="text-[10px] md:text-xs font-mono mb-1.5 flex gap-3"
-                    >
-                      {line.text.startsWith('[  OK  ]') ? (
-                        <>
-                          <span className="text-white font-bold">[</span>
-                          <span className="text-primary font-bold">  OK  </span>
-                          <span className="text-white font-bold">]</span>
-                          <span className="text-white/80">{line.text.slice(8)}</span>
-                        </>
-                      ) : (
-                        <span className="text-primary italic opacity-60">:: {line.text}</span>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Progress Visual */}
-                <div className="w-full max-w-xl mx-auto space-y-5">
-                  <div className="flex justify-between items-end">
-                    <div className="space-y-1.5">
-                      <div className="text-[9px] uppercase text-primary/50 tracking-[0.4em]">Mounting User Environment</div>
-                      <div className="text-3xl font-display font-black tracking-tighter tabular-nums text-white text-shadow-arch">
-                        {progress.toFixed(1)}%
-                      </div>
-                    </div>
-                  </div>
-                  <div className="h-1 bg-primary/10 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-primary arch-glow"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progress}%` }}
-                      transition={{ duration: 0.2 }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Phase 4: REVEAL */}
-            {(phase === 'WORKSPACE' || phase === 'REVEAL') && (
-              <div className="flex-1 flex flex-col items-center justify-center text-center">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, filter: "blur(20px)" }}
-                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                  className="space-y-10 relative"
-                >
-                  <ArchLogo />
-
-                  <div className="space-y-3">
-                    <h1 className="text-6xl md:text-8xl font-display font-black tracking-[0.2em] uppercase text-white relative animate-glitch-text">
-                      CHAUHAN<span className="text-primary">OS</span>
-                    </h1>
-                    <p className="text-primary/60 tracking-[0.8em] font-medium text-[10px] md:text-xs uppercase">
-                      Simple // Minimalist // Powerful
-                    </p>
-                  </div>
-
-                  <div className="h-px w-32 mx-auto bg-white/10" />
-
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                    className="flex flex-col items-center gap-4"
-                  >
-                    <div className="flex items-center gap-3 text-primary text-xs">
-                      <span className="animate-pulse">●</span>
-                      AUTHENTICATION SUCCESSFUL
-                    </div>
-                  </motion.div>
-
-                  {/* Minimalist corners */}
-                  <div className="absolute -top-12 -left-12 w-8 h-8 border-t border-l border-white/5" />
-                  <div className="absolute -top-12 -right-12 w-8 h-8 border-t border-r border-white/5" />
-                  <div className="absolute -bottom-12 -left-12 w-8 h-8 border-b border-l border-white/5" />
-                  <div className="absolute -bottom-12 -right-12 w-8 h-8 border-b border-r border-white/5" />
-                </motion.div>
-              </div>
-            )}
-
-            {/* Footer Control */}
-            <div className="mt-12 flex justify-between items-center opacity-25 text-[9px] tracking-[0.4em]">
-              <div>© 2026 Chauhan Dynamics // ARCH_V3</div>
-              <button
-                onClick={handleSkip}
-                className="hover:text-white hover:opacity-100 transition-all border border-primary/30 px-5 py-1.5 bg-primary/5"
-              >
-                [ SKIP_BOOT ]
-              </button>
             </div>
+          )}
+
+          {/* Phase: KERNEL */}
+          {phase === 'KERNEL' && (
+            <div className="h-full flex flex-col p-4 md:p-8 bg-black">
+              <div
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto no-scrollbar font-mono text-[10px] md:text-xs leading-relaxed"
+              >
+                {KERNEL_LOGS.slice(0, kernelIndex + 1).map((log, i) => (
+                  <div key={i} className="flex gap-4">
+                    {log.text.startsWith('[  OK  ]') ? (
+                      <div className="flex gap-2">
+                        <span className="text-white">[</span>
+                        <span className="text-green-500 font-bold">  OK  </span>
+                        <span className="text-white">]</span>
+                        <span className="text-gray-300">{log.text.slice(8)}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">{log.text}</span>
+                    )}
+                  </div>
+                ))}
+                <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse" />
+              </div>
+            </div>
+          )}
+
+          {/* Phase: LOGIN */}
+          {phase === 'LOGIN' && (
+            <div className="p-8 md:p-16 h-full flex flex-col justify-start bg-black tty-prompt">
+              <div className="space-y-2 text-sm md:text-base">
+                <div>Arch Linux 6.5.0-arch1-1 (tty1)</div>
+                <div className="pt-4">
+                  <span>chauhanos login: </span>
+                  {loginStep >= 2 && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}>dk-chauhan</motion.span>}
+                  {loginStep === 1 && <span className="inline-block w-2 h-5 bg-white animate-pulse" />}
+                </div>
+                {loginStep >= 3 && (
+                  <div>
+                    <span>Password: </span>
+                    {loginStep >= 4 && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}>*********</motion.span>}
+                    {loginStep === 3 && <span className="inline-block w-2 h-5 bg-white animate-pulse" />}
+                  </div>
+                )}
+                {loginStep >= 5 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="pt-6 text-primary"
+                  >
+                    Welcome to ChauhanOS (dk-chauhan version)
+                  </motion.div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Phase: REVEAL (The GUI startup) */}
+          {(phase === 'GRAYSWITCH' || phase === 'REVEAL') && (
+            <div className="relative h-full w-full overflow-hidden bg-[#0c0c0c]">
+              {/* Blurred desktop preview could go here if we had a screenshot */}
+
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                <motion.pre
+                  initial={{ filter: "blur(20px)", scale: 0.8, opacity: 0 }}
+                  animate={{ filter: "blur(0px)", scale: 1, opacity: 1 }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="text-primary text-[8px] md:text-[10px] leading-tight mb-12 font-black animate-holo-pulse"
+                >
+                  {ArchASCII}
+                </motion.pre>
+
+                <div className="text-center space-y-4">
+                  <motion.h1
+                    initial={{ letterSpacing: "1em", opacity: 0 }}
+                    animate={{ letterSpacing: "0.2em", opacity: 1 }}
+                    transition={{ duration: 1.5, ease: "circOut" }}
+                    className="text-6xl md:text-8xl font-display font-black uppercase text-white relative"
+                  >
+                    CHAUHAN<span className="text-primary">OS</span>
+                  </motion.h1>
+
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="h-px w-64 bg-primary/20" />
+                    <div className="h-[2px] w-32 bg-primary shadow-neon-sm" />
+                    <div className="h-px w-64 bg-primary/20" />
+                  </div>
+                </div>
+
+                {/* DE Initialization Logs */}
+                {phase === 'REVEAL' && (
+                  <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-full max-w-sm px-8">
+                    <div className="text-[10px] md:text-xs font-mono text-center space-y-1">
+                      {DE_INIT_LOGS.slice(0, deInitIndex + 1).map((log, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 0.6 }}
+                          className="truncate"
+                        >
+                          <span className="text-primary mr-2">»</span>
+                          {log}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute top-10 left-10 w-24 h-24 border-t-2 border-l-2 border-primary/20" />
+              <div className="absolute bottom-10 right-10 w-24 h-24 border-b-2 border-r-2 border-primary/20" />
+            </div>
+          )}
+
+          {/* Skip Control */}
+          <div className="fixed bottom-4 right-4 opacity-10 hover:opacity-50 transition-opacity">
+            <button
+              onClick={handleSkip}
+              className="text-[10px] font-mono border border-white/20 px-3 py-1 uppercase"
+            >
+              Skip Boot
+            </button>
           </div>
         </motion.div>
       )}
