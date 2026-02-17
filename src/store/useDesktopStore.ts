@@ -1,6 +1,7 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
-export type AppId = 'about' | 'projects' | 'skills' | 'terminal' | 'contact' | 'resume' | 'browser' | 'settings' | 'github';
+export type AppId = 'about' | 'projects' | 'skills' | 'terminal' | 'contact' | 'resume' | 'browser' | 'settings' | 'github' | 'achievements';
 
 export interface WindowState {
   id: AppId;
@@ -18,11 +19,7 @@ export interface FileSystemItem {
   type: 'file' | 'folder';
   content?: string;
   children?: FileSystemItem[];
-  parent?: FileSystemItem | null; // creating circular references in valid JSON state is tricky with Zustand/Immer, so maybe avoid parent pointers in the store state and handle traversal differently, or just use paths.
 }
-
-// Simplified FS for the store (using paths as keys might be easier, or just a recursive tree)
-// Let's go with a recursive tree for now.
 
 export const INITIAL_FILE_SYSTEM: FileSystemItem[] = [
   {
@@ -43,6 +40,16 @@ export const INITIAL_FILE_SYSTEM: FileSystemItem[] = [
   },
 ];
 
+interface DesktopSettings {
+  wallpaper: string;
+  darkMode: boolean;
+  primaryColor: string; // HSL format like "185 100% 50%"
+  animationIntensity: number; // 0 to 1
+  isEffectsEnabled: boolean;
+  glassOpacity: number; // 0 to 1
+  bootLogs: string[];
+}
+
 interface DesktopStore {
   windows: WindowState[];
   nextZIndex: number;
@@ -58,13 +65,27 @@ interface DesktopStore {
   setFileSystem: (fs: FileSystemItem[]) => void;
 
   // Settings
-  settings: {
-    wallpaper: string;
-    darkMode: boolean;
-  };
-  setWallpaper: (url: string) => void;
-  toggleDarkMode: () => void;
+  settings: DesktopSettings;
+  updateSettings: (settings: Partial<DesktopSettings>) => void;
+  resetSettings: () => void;
+
+  // Config Actions
+  exportConfig: () => string;
+  importConfig: (configJson: string) => boolean;
 }
+
+const DEFAULT_SETTINGS: DesktopSettings = {
+  wallpaper: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop',
+  darkMode: true,
+  primaryColor: '185 100% 50%',
+  animationIntensity: 1,
+  isEffectsEnabled: true,
+  glassOpacity: 0.85,
+  bootLogs: [
+    "GPU: NVIDIA RTX 5090 Ti - 32GB VRAM",
+    "VULKAN: VK_LAYER_CHAUHAN_OVERLAY detected",
+  ],
+};
 
 const APP_DEFAULTS: Record<AppId, { title: string; icon: string; size: { width: number; height: number } }> = {
   about: { title: 'System Info', icon: '🧑', size: { width: 500, height: 400 } },
@@ -75,6 +96,8 @@ const APP_DEFAULTS: Record<AppId, { title: string; icon: string; size: { width: 
   resume: { title: 'Resume Viewer', icon: '📄', size: { width: 550, height: 450 } },
   browser: { title: 'Web Browser', icon: '🌐', size: { width: 800, height: 500 } },
   settings: { title: 'Settings', icon: '⚙️', size: { width: 600, height: 450 } },
+  github: { title: 'GitHub Explorer', icon: '🐙', size: { width: 800, height: 600 } },
+  achievements: { title: 'Achievements', icon: '🏆', size: { width: 600, height: 400 } },
 };
 
 const getInitialPosition = (index: number) => ({
@@ -82,79 +105,104 @@ const getInitialPosition = (index: number) => ({
   y: 60 + (index % 3) * 30,
 });
 
-export const useDesktopStore = create<DesktopStore>((set) => ({
-  windows: [],
-  nextZIndex: 10,
-  fileSystem: INITIAL_FILE_SYSTEM,
-  settings: {
-    wallpaper: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop', // Cyberpunk city
-    darkMode: true,
-  },
+export const useDesktopStore = create<DesktopStore>()(
+  persist(
+    (set, get) => ({
+      windows: [],
+      nextZIndex: 10,
+      fileSystem: INITIAL_FILE_SYSTEM,
+      settings: DEFAULT_SETTINGS,
 
-  setFileSystem: (newFs) => set({ fileSystem: newFs }),
-  setWallpaper: (wallpaper) => set((state) => ({ settings: { ...state.settings, wallpaper } })),
-  toggleDarkMode: () => set((state) => ({ settings: { ...state.settings, darkMode: !state.settings.darkMode } })),
+      setFileSystem: (newFs) => set({ fileSystem: newFs }),
 
-  openApp: (id) =>
-    set((state) => {
-      const existing = state.windows.find((w) => w.id === id);
-      if (existing) {
-        return {
+      updateSettings: (newSettings) => set((state) => ({
+        settings: { ...state.settings, ...newSettings }
+      })),
+
+      resetSettings: () => set({ settings: DEFAULT_SETTINGS }),
+
+      openApp: (id) =>
+        set((state) => {
+          const existing = state.windows.find((w) => w.id === id);
+          if (existing) {
+            return {
+              windows: state.windows.map((w) =>
+                w.id === id ? { ...w, isMinimized: false, zIndex: state.nextZIndex } : w
+              ),
+              nextZIndex: state.nextZIndex + 1,
+            };
+          }
+          const defaults = APP_DEFAULTS[id];
+          const newWindow: WindowState = {
+            id,
+            title: defaults.title,
+            icon: defaults.icon,
+            isMinimized: false,
+            isMaximized: false,
+            zIndex: state.nextZIndex,
+            position: getInitialPosition(state.windows.length),
+            size: defaults.size,
+          };
+          return {
+            windows: [...state.windows, newWindow],
+            nextZIndex: state.nextZIndex + 1,
+          };
+        }),
+
+      closeApp: (id) =>
+        set((state) => ({
+          windows: state.windows.filter((w) => w.id !== id),
+        })),
+
+      minimizeApp: (id) =>
+        set((state) => ({
           windows: state.windows.map((w) =>
-            w.id === id ? { ...w, isMinimized: false, zIndex: state.nextZIndex } : w
+            w.id === id ? { ...w, isMinimized: true } : w
+          ),
+        })),
+
+      maximizeApp: (id) =>
+        set((state) => ({
+          windows: state.windows.map((w) =>
+            w.id === id ? { ...w, isMaximized: !w.isMaximized, zIndex: state.nextZIndex } : w
           ),
           nextZIndex: state.nextZIndex + 1,
-        };
-      }
-      const defaults = APP_DEFAULTS[id];
-      const newWindow: WindowState = {
-        id,
-        title: defaults.title,
-        icon: defaults.icon,
-        isMinimized: false,
-        isMaximized: false,
-        zIndex: state.nextZIndex,
-        position: getInitialPosition(state.windows.length),
-        size: defaults.size,
-      };
-      return {
-        windows: [...state.windows, newWindow],
-        nextZIndex: state.nextZIndex + 1,
-      };
+        })),
+
+      focusApp: (id) =>
+        set((state) => ({
+          windows: state.windows.map((w) =>
+            w.id === id ? { ...w, zIndex: state.nextZIndex } : w
+          ),
+          nextZIndex: state.nextZIndex + 1,
+        })),
+
+      updatePosition: (id, position) =>
+        set((state) => ({
+          windows: state.windows.map((w) =>
+            w.id === id ? { ...w, position } : w
+          ),
+        })),
+
+      exportConfig: () => {
+        return JSON.stringify(get().settings, null, 2);
+      },
+
+      importConfig: (configJson) => {
+        try {
+          const config = JSON.parse(configJson);
+          set({ settings: { ...DEFAULT_SETTINGS, ...config } });
+          return true;
+        } catch (e) {
+          console.error('Failed to import config:', e);
+          return false;
+        }
+      },
     }),
-
-  closeApp: (id) =>
-    set((state) => ({
-      windows: state.windows.filter((w) => w.id !== id),
-    })),
-
-  minimizeApp: (id) =>
-    set((state) => ({
-      windows: state.windows.map((w) =>
-        w.id === id ? { ...w, isMinimized: true } : w
-      ),
-    })),
-
-  maximizeApp: (id) =>
-    set((state) => ({
-      windows: state.windows.map((w) =>
-        w.id === id ? { ...w, isMaximized: !w.isMaximized, zIndex: state.nextZIndex } : w
-      ),
-      nextZIndex: state.nextZIndex + 1,
-    })),
-
-  focusApp: (id) =>
-    set((state) => ({
-      windows: state.windows.map((w) =>
-        w.id === id ? { ...w, zIndex: state.nextZIndex } : w
-      ),
-      nextZIndex: state.nextZIndex + 1,
-    })),
-
-  updatePosition: (id, position) =>
-    set((state) => ({
-      windows: state.windows.map((w) =>
-        w.id === id ? { ...w, position } : w
-      ),
-    })),
-}));
+    {
+      name: 'chauhanos-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ settings: state.settings, fileSystem: state.fileSystem }),
+    }
+  )
+);

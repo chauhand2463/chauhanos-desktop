@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { Github, Users, Book } from 'lucide-react';
 
 const stats = [
   { label: 'User', value: 'Dk Chauhan' },
@@ -12,15 +14,37 @@ const stats = [
 ];
 
 const AboutApp = () => {
+  const [ghStats, setGhStats] = useState({ followers: 0, repos: 0 });
+
+  useEffect(() => {
+    fetch('https://api.github.com/users/chauhand2463')
+      .then(res => res.json())
+      .then(data => {
+        setGhStats({ followers: data.followers || 0, repos: data.public_repos || 0 });
+      })
+      .catch(console.error);
+  }, []);
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3 mb-4">
+    <div className="space-y-4 overflow-y-auto no-scrollbar h-full pb-4">
+      <div className="flex items-center gap-3 mb-4 shrink-0">
         <div className="w-14 h-14 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-2xl neon-glow">
           🧑
         </div>
         <div>
           <h2 className="font-display text-lg font-bold text-primary neon-text">Dk Chauhan</h2>
           <p className="text-xs text-muted-foreground">Developer • Creator • Builder</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="p-3 rounded-lg bg-primary/5 border border-primary/10 flex flex-col items-center">
+          <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-tighter">Followers</span>
+          <span className="text-xl font-bold text-secondary-foreground">{ghStats.followers}</span>
+        </div>
+        <div className="p-3 rounded-lg bg-primary/5 border border-primary/10 flex flex-col items-center">
+          <span className="text-[10px] text-muted-foreground uppercase font-mono tracking-tighter">Repositories</span>
+          <span className="text-xl font-bold text-secondary-foreground">{ghStats.repos}</span>
         </div>
       </div>
 

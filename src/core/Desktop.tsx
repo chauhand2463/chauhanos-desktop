@@ -11,6 +11,9 @@ import ContactApp from '@/apps/ContactApp';
 import ResumeApp from '@/apps/ResumeApp';
 import BrowserApp from '@/apps/BrowserApp';
 import SettingsApp from '@/apps/SettingsApp';
+import GithubApp from '@/apps/GithubApp';
+import AchievementsApp from '@/apps/AchievementsApp';
+import ParticleBackground from '@/components/ParticleBackground';
 
 const DESKTOP_ICONS: { id: AppId; icon: string; label: string }[] = [
   { id: 'about', icon: '🧑', label: 'System Info' },
@@ -20,6 +23,7 @@ const DESKTOP_ICONS: { id: AppId; icon: string; label: string }[] = [
   { id: 'browser', icon: '🌐', label: 'Browser' },
   { id: 'contact', icon: '📧', label: 'Contact' },
   { id: 'resume', icon: '📄', label: 'Resume' },
+  { id: 'github', icon: '🐙', label: 'GitHub' },
   { id: 'settings', icon: '⚙️', label: 'Settings' },
 ];
 
@@ -31,7 +35,9 @@ const APP_COMPONENTS: Record<AppId, React.ComponentType> = {
   contact: ContactApp,
   resume: ResumeApp,
   browser: BrowserApp,
+  github: GithubApp,
   settings: SettingsApp,
+  achievements: AchievementsApp,
 };
 
 const Desktop = () => {
@@ -47,6 +53,9 @@ const Desktop = () => {
 
       {/* Dark overlay for readability */}
       <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+
+      {/* Dynamic Background Effects */}
+      <ParticleBackground />
 
       {/* Scanline overlay */}
       <div className="fixed inset-0 scanline z-[998] pointer-events-none opacity-50" />

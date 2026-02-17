@@ -1,17 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDesktopStore } from '@/store/useDesktopStore';
 
 const BIOS_SPECS = [
   "ARCHBOOT(C)2026 Chauhan Dynamics",
   "ChauhanOS Arch-Core Revision 3.1.0",
-  "CPU: Dk Chauhan Core(TM) i9-X Extreme @ 5.80GHz",
+  "CPU: Dhairy Chauhan Core(TM) i9-X Extreme @ 5.80GHz",
   "Speed: 5800MHz  Count: 16",
   "Memory Test: 65536MB OK",
-  "PMU: Initializing... Done",
-  "Mounting /dev/sda1 on /boot...",
-  "Loading vmlinuz-linux...",
-  "Loading initial ramdisk...",
-  "Arch Linux 6.5.0-arch1-1 (tty1)",
 ];
 
 const KERNEL_LOGS = [
@@ -32,7 +28,7 @@ const KERNEL_LOGS = [
 ];
 
 const ArchLogo = () => (
-  <svg viewBox="0 0 100 100" className="w-32 h-32 mb-8 fill-current text-[#1793d1] drop-shadow-[0_0_20px_rgba(23,147,209,0.6)]">
+  <svg viewBox="0 0 100 100" className="w-32 h-32 mb-8 fill-current text-primary drop-shadow-[0_0_20px_hsla(var(--primary),0.6)]">
     <path d="M50 10 L90 85 L75 85 L50 40 L25 85 L10 85 Z" fill="currentColor" />
     <path d="M50 30 L65 70 L35 70 Z" fill="black" opacity="0.4" />
     <path d="M50 10 L10 85 L90 85 Z" fill="none" stroke="currentColor" strokeWidth="2" strokeOpacity="0.5" />
@@ -41,7 +37,7 @@ const ArchLogo = () => (
 
 const TuxLogo = () => (
   <div className="absolute top-8 right-8 mix-blend-screen opacity-40">
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor" className="text-[#1793d1]">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="currentColor" className="text-primary">
       <path d="M20 2c-5 0-9 4-9 9 0 2 1 4 2 6-1 2-2 4-2 7 0 6 4 9 9 9s9-3 9-9c0-3-1-5-2-7 1-2 2-4 2-6 0-5-4-9-9-9zm-3 8c1 0 2 1 2 2s-1 2-2 2-2-1-2-2 1-2 2-2zm6 0c1 0 2 1 2 2s-1 2-2 2-2-1-2-2 1-2 2-2z" />
     </svg>
   </div>
@@ -54,6 +50,7 @@ interface BootScreenProps {
 type BootPhase = 'BIOS' | 'KERNEL' | 'WORKSPACE' | 'REVEAL';
 
 const BootScreen = ({ onComplete }: BootScreenProps) => {
+  const { settings } = useDesktopStore();
   const [phase, setPhase] = useState<BootPhase>('BIOS');
   const [biosIndex, setBiosIndex] = useState(0);
   const [kernelIndex, setKernelIndex] = useState(0);
@@ -71,9 +68,18 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
   // BIOS Phase
   useEffect(() => {
     if (phase === 'BIOS') {
+      const fullBios = [
+        ...BIOS_SPECS,
+        ...settings.bootLogs,
+        "Mounting /dev/sda1 on /boot...",
+        "Loading vmlinuz-linux...",
+        "Loading initial ramdisk...",
+        "Arch Linux 6.5.0-arch1-1 (tty1)",
+      ];
+
       const interval = setInterval(() => {
         setBiosIndex(prev => {
-          if (prev >= BIOS_SPECS.length - 1) {
+          if (prev >= fullBios.length - 1) {
             clearInterval(interval);
             setTimeout(() => setPhase('KERNEL'), 800);
             return prev;
@@ -83,7 +89,7 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
       }, 35);
       return () => clearInterval(interval);
     }
-  }, [phase]);
+  }, [phase, settings.bootLogs]);
 
   // KERNEL Phase
   useEffect(() => {
@@ -132,7 +138,7 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
     <AnimatePresence>
       {!isDone && (
         <motion.div
-          className="fixed inset-0 z-[100] bg-[#0c0c0c] text-[#1793d1] font-mono selection:bg-[#1793d1]/30 overflow-hidden"
+          className="fixed inset-0 z-[100] bg-[#0c0c0c] text-primary font-mono selection:bg-primary/30 overflow-hidden"
           exit={{
             opacity: 0,
             scale: 1.05,
@@ -152,7 +158,7 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
             {/* Header / Brand */}
             <div className="flex justify-between items-start mb-12 opacity-40 text-[10px] tracking-[0.3em] uppercase">
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 bg-[#1793d1] rounded-full shadow-[0_0_10px_#1793d1]" />
+                <div className="w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_10px_hsl(var(--primary))]" />
                 ARCH_CORE v2026.02
               </div>
               <div>STATION: PORTFOLIO-01</div>
@@ -164,7 +170,7 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
                 <div className="text-white/90 mb-8 text-lg font-bold tracking-widest">
                   [ ARCH_BOOT_LOADER ]
                 </div>
-                {BIOS_SPECS.slice(0, biosIndex + 1).map((line, i) => (
+                {[...BIOS_SPECS, ...settings.bootLogs, "Mounting /dev/sda1 on /boot...", "Loading vmlinuz-linux...", "Loading initial ramdisk...", "Arch Linux 6.5.0-arch1-1 (tty1)"].slice(0, biosIndex + 1).map((line, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, x: -5 }}
@@ -175,7 +181,7 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
                     {line}
                   </motion.div>
                 ))}
-                <span className="inline-block w-2.5 h-4.5 bg-[#1793d1] animate-pulse ml-1 mt-3" />
+                <span className="inline-block w-2.5 h-4.5 bg-primary animate-pulse ml-1 mt-3" />
               </div>
             )}
 
@@ -196,12 +202,12 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
                       {line.text.startsWith('[  OK  ]') ? (
                         <>
                           <span className="text-white font-bold">[</span>
-                          <span className="text-[#1793d1] font-bold">  OK  </span>
+                          <span className="text-primary font-bold">  OK  </span>
                           <span className="text-white font-bold">]</span>
                           <span className="text-white/80">{line.text.slice(8)}</span>
                         </>
                       ) : (
-                        <span className="text-[#1793d1] italic opacity-60">:: {line.text}</span>
+                        <span className="text-primary italic opacity-60">:: {line.text}</span>
                       )}
                     </motion.div>
                   ))}
@@ -211,15 +217,15 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
                 <div className="w-full max-w-xl mx-auto space-y-5">
                   <div className="flex justify-between items-end">
                     <div className="space-y-1.5">
-                      <div className="text-[9px] uppercase text-[#1793d1]/50 tracking-[0.4em]">Mounting User Environment</div>
+                      <div className="text-[9px] uppercase text-primary/50 tracking-[0.4em]">Mounting User Environment</div>
                       <div className="text-3xl font-display font-black tracking-tighter tabular-nums text-white text-shadow-arch">
                         {progress.toFixed(1)}%
                       </div>
                     </div>
                   </div>
-                  <div className="h-1 bg-[#1793d1]/10 rounded-full overflow-hidden">
+                  <div className="h-1 bg-primary/10 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-[#1793d1] arch-glow"
+                      className="h-full bg-primary arch-glow"
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 0.2 }}
@@ -240,10 +246,10 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
                   <ArchLogo />
 
                   <div className="space-y-3">
-                    <h1 className="text-6xl md:text-8xl font-display font-black tracking-[0.2em] uppercase text-white relative">
-                      CHAUHAN<span className="text-[#1793d1]">OS</span>
+                    <h1 className="text-6xl md:text-8xl font-display font-black tracking-[0.2em] uppercase text-white relative animate-glitch-text">
+                      CHAUHAN<span className="text-primary">OS</span>
                     </h1>
-                    <p className="text-[#1793d1]/60 tracking-[0.8em] font-medium text-[10px] md:text-xs uppercase">
+                    <p className="text-primary/60 tracking-[0.8em] font-medium text-[10px] md:text-xs uppercase">
                       Simple // Minimalist // Powerful
                     </p>
                   </div>
@@ -256,7 +262,7 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
                     transition={{ delay: 0.8 }}
                     className="flex flex-col items-center gap-4"
                   >
-                    <div className="flex items-center gap-3 text-[#1793d1] text-xs">
+                    <div className="flex items-center gap-3 text-primary text-xs">
                       <span className="animate-pulse">●</span>
                       AUTHENTICATION SUCCESSFUL
                     </div>
@@ -276,7 +282,7 @@ const BootScreen = ({ onComplete }: BootScreenProps) => {
               <div>© 2026 Chauhan Dynamics // ARCH_V3</div>
               <button
                 onClick={handleSkip}
-                className="hover:text-white hover:opacity-100 transition-all border border-[#1793d1]/30 px-5 py-1.5 bg-[#1793d1]/5"
+                className="hover:text-white hover:opacity-100 transition-all border border-primary/30 px-5 py-1.5 bg-primary/5"
               >
                 [ SKIP_BOOT ]
               </button>

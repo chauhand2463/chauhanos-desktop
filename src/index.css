@@ -36,6 +36,8 @@
 
     --radius: 0.5rem;
 
+    --neon-cyan: 185 100% 50%;
+    --neon-purple: 280 100% 65%;
     --neon-green: 140 100% 50%;
     --matrix-green: 120 100% 50%;
     --matrix-dark: 120 100% 5%;
@@ -138,6 +140,14 @@
 
   .skill-bar {
     background: linear-gradient(90deg, hsl(var(--neon-cyan)), hsl(var(--neon-purple)));
+  }
+
+  .shadow-neon-sm {
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.3), 0 0 20px hsl(var(--primary) / 0.1);
+  }
+
+  .shadow-neon-lg {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.5), 0 0 40px hsl(var(--primary) / 0.2);
   }
 
   .cursor-blink {
