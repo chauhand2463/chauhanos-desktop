@@ -54,22 +54,35 @@ const Window = ({ id, title, icon, isMinimized, isMaximized, zIndex, position, s
     [id, isMaximized, position, focusApp, updatePosition]
   );
 
-  if (isMinimized) return null;
-
-  const style = isMaximized
-    ? { top: 0, left: 0, right: 0, bottom: 48, width: '100%', height: 'calc(100% - 48px)', zIndex }
-    : { top: position.y, left: position.x, width: size.width, height: size.height, zIndex };
+  // No early return here - let Framer Motion handle it through animate/variants
 
   return (
     <motion.div
       ref={windowRef}
-      className={`absolute glass-strong rounded-lg overflow-hidden flex flex-col neon-glow ${isMaximized ? '' : ''}`}
-      style={style}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="absolute glass-strong rounded-lg overflow-hidden flex flex-col neon-glow"
+      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+      animate={{
+        opacity: isMinimized ? 0 : 1,
+        scale: isMinimized ? 0.3 : 1,
+        x: isMaximized ? 0 : position.x,
+        y: isMinimized ? window.innerHeight : (isMaximized ? 0 : position.y),
+        width: isMaximized ? '100%' : size.width,
+        height: isMaximized ? 'calc(100% - 48px)' : size.height,
+        zIndex: zIndex,
+        pointerEvents: isMinimized ? 'none' : 'auto'
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 260,
+        damping: 26,
+        mass: 0.8,
+        opacity: { duration: 0.2 },
+        // Custom durations for window resizing/moving for premium feel
+        width: { duration: 0.4 },
+        height: { duration: 0.4 }
+      }}
       onMouseDown={() => focusApp(id)}
+      layoutId={`window-${id}`}
     >
       {/* Title bar */}
       <div
