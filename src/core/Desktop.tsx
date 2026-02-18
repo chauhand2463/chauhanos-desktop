@@ -55,7 +55,13 @@ const Desktop = () => {
       <div className="absolute inset-0 bg-black/30 pointer-events-none" />
 
       {/* Dynamic Background Effects */}
-      <ParticleBackground />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        <ParticleBackground />
+      </motion.div>
 
       {/* Scanline overlay */}
       <div className="fixed inset-0 scanline z-[998] pointer-events-none opacity-50" />
@@ -63,16 +69,16 @@ const Desktop = () => {
       {/* Desktop icons */}
       <motion.div
         className="absolute top-4 left-4 flex flex-col gap-1 z-[5]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
       >
         {DESKTOP_ICONS.map((app, i) => (
           <motion.div
             key={app.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 + i * 0.08 }}
+            transition={{ delay: 0.8 + i * 0.1, duration: 0.4 }}
           >
             <DesktopIcon
               id={app.id}
@@ -97,7 +103,13 @@ const Desktop = () => {
       </AnimatePresence>
 
       {/* Taskbar */}
-      <Taskbar />
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.8, ease: "circOut" }}
+      >
+        <Taskbar />
+      </motion.div>
     </div>
   );
 };
