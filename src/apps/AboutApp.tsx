@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react';
 import { Github, Users, Book } from 'lucide-react';
 
 const stats = [
-  { label: 'User', value: 'Dk Chauhan' },
-  { label: 'Role', value: 'Frontend Developer' },
-  { label: 'OS', value: 'ChauhanOS v2.0' },
+  { label: 'User', value: 'Dhairy Chauhan' },
+  { label: 'Role', value: 'Full Stack Developer' },
+  { label: 'Uni', value: 'Charotar University (CSPIT)' },
+  { label: 'OS', value: 'ChauhanOS v2.4' },
   { label: 'Kernel', value: 'React 18.3 LTS' },
-  { label: 'Shell', value: 'TypeScript 5.x' },
-  { label: 'Uptime', value: 'Coding since 2024' },
-  { label: 'Location', value: 'India' },
-  { label: 'Status', value: '🟢 Online & Building' },
+  { label: 'Focus', value: 'Web3 & AI' },
+  { label: 'Location', value: 'Gujarat, India' },
+  { label: 'Status', value: '🟢 Building the Future' },
 ];
 
 const AboutApp = () => {
@@ -32,8 +32,8 @@ const AboutApp = () => {
           🧑
         </div>
         <div>
-          <h2 className="font-display text-lg font-bold text-primary neon-text">Dk Chauhan</h2>
-          <p className="text-xs text-muted-foreground">Developer • Creator • Builder</p>
+          <h2 className="font-display text-lg font-bold text-primary neon-text">Dhairy Chauhan</h2>
+          <p className="text-xs text-muted-foreground">Full Stack Dev • Web3 & AI Enthusiast</p>
         </div>
       </div>
 
@@ -65,10 +65,10 @@ const AboutApp = () => {
 
       <div className="mt-4 p-3 rounded bg-secondary/30 border border-border">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Passionate developer focused on building modern web applications.
-          I love creating unique user experiences and pushing the boundaries of
-          what's possible on the web. Currently exploring React, TypeScript,
-          and creative frontend development.
+          Computer Engineering student at Charotar University (CSPIT).
+          Focused on building scalable Full Stack applications and exploring
+          the decentralized frontier of Web3 and the cognitive capabilities of AI.
+          I love pushing the boundaries of what's possible in the digital realm.
         </p>
       </div>
     </div>

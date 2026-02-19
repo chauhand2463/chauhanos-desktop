@@ -40,14 +40,42 @@ const APP_COMPONENTS: Record<AppId, React.ComponentType> = {
   achievements: AchievementsApp,
 };
 
+import { useState, useCallback, useEffect } from 'react';
+import DesktopContextMenu from '@/components/DesktopContextMenu';
+import { toast } from 'sonner';
+
 const Desktop = () => {
   const { windows, openApp, settings } = useDesktopStore();
+  const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null);
+
+  useEffect(() => {
+    toast.success("Session Initialized", {
+      description: "Welcome back, Dhairy. All systems are operational.",
+      duration: 5000,
+    });
+  }, []);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
 
   return (
     <div
       className="fixed inset-0 bg-background overflow-hidden bg-cover bg-center bg-no-repeat transition-all duration-500"
       style={{ backgroundImage: `url(${settings.wallpaper})` }}
+      onContextMenu={handleContextMenu}
+      onClick={() => setContextMenu(null)}
     >
+      <AnimatePresence>
+        {contextMenu && (
+          <DesktopContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
+      </AnimatePresence>
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 desktop-grid opacity-50 pointer-events-none" />
 

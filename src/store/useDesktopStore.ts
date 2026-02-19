@@ -31,9 +31,9 @@ export const INITIAL_FILE_SYSTEM: FileSystemItem[] = [
         type: 'folder',
         children: [
           { name: 'projects', type: 'folder', children: [] },
-          { name: 'skills.txt', type: 'file', content: 'React, TypeScript, Node.js, Python...' },
-          { name: 'about.md', type: 'file', content: '# About Me\n\nI am a developer...' },
-          { name: 'contact.txt', type: 'file', content: 'Email: example@example.com' },
+          { name: 'skills.txt', type: 'file', content: 'Full Stack Development, Web3, AI, React, TypeScript, Node.js, Python...' },
+          { name: 'about.md', type: 'file', content: '# About Me\n\nI am a Computer Engineering student at Charotar University (CSPIT). I specialize in Full Stack Development with a strong interest in Web3 and AI.' },
+          { name: 'contact.txt', type: 'file', content: 'Email: dkc074837@gmail.com\nMobile: +919428280245' },
         ],
       },
     ],
@@ -48,6 +48,7 @@ interface DesktopSettings {
   isEffectsEnabled: boolean;
   glassOpacity: number; // 0 to 1
   bootLogs: string[];
+  isLocked: boolean;
 }
 
 interface DesktopStore {
@@ -72,6 +73,10 @@ interface DesktopStore {
   // Config Actions
   exportConfig: () => string;
   importConfig: (configJson: string) => boolean;
+
+  // Lock Actions
+  lockScreen: () => void;
+  unlockScreen: () => void;
 }
 
 const DEFAULT_SETTINGS: DesktopSettings = {
@@ -85,6 +90,7 @@ const DEFAULT_SETTINGS: DesktopSettings = {
     "GPU: NVIDIA RTX 5090 Ti - 32GB VRAM",
     "VULKAN: VK_LAYER_CHAUHAN_OVERLAY detected",
   ],
+  isLocked: true,
 };
 
 const APP_DEFAULTS: Record<AppId, { title: string; icon: string; size: { width: number; height: number } }> = {
@@ -198,6 +204,9 @@ export const useDesktopStore = create<DesktopStore>()(
           return false;
         }
       },
+
+      lockScreen: () => set((state) => ({ settings: { ...state.settings, isLocked: true } })),
+      unlockScreen: () => set((state) => ({ settings: { ...state.settings, isLocked: false } })),
     }),
     {
       name: 'chauhanos-storage',

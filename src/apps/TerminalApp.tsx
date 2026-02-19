@@ -14,20 +14,47 @@ const COMMANDS: Record<string, string> = {
   neofetch  - System info
   date      - Show current date
   echo      - Echo a message
-  open      - Open an application`,
+  open      - Open an application
+  
+  Portfolio Commands:
+  experience - Show work history
+  projects   - Show project list
+  skills     - Show technical skills
+  contact    - Show contact details`,
 
-  whoami: '> dk_chauhan (admin)',
+  whoami: '> dhairy_chauhan (admin)',
 
   neofetch: `
-  ╔══════════════════════════════╗
-  ║       ChauhanOS v2.0         ║
-  ╠══════════════════════════════╣
-  ║  User:    Dhairy Chauhan     ║
-  ║  Shell:   React Term v2      ║
-  ║  Kernel:  Web                ║
-  ║  UI:      Tailwind CSS       ║
-  ║  Uptime:  Always coding      ║
-  ╚══════════════════════════════╝`,
+  \x1b[1;36m       .---.        \x1b[0m   \x1b[1;36mUser:\x1b[0m    Dhairy Chauhan
+  \x1b[1;36m      /     \\       \x1b[0m   \x1b[1;36mOS:\x1b[0m      ChauhanOS v2.4 (Custom)
+  \x1b[1;36m     | () () |      \x1b[0m   \x1b[1;36mKernel:\x1b[0m  Web Runtime (V8)
+  \x1b[1;36m      \\  ^  /       \x1b[0m   \x1b[1;36mShell:\x1b[0m   React Bash v4
+  \x1b[1;36m       |||||        \x1b[0m   \x1b[1;36mUptime:\x1b[0m  Infinity
+  \x1b[1;36m       '---'        \x1b[0m   \x1b[1;36mUni:\x1b[0m     Charotar University (CSPIT)`,
+
+  experience: `
+  \x1b[1;35mFull Stack Developer\x1b[0m @ Independent (2024 - Present)
+  - Focused on Web3 architectures and AI integrations.
+  - Built ChauhanOS - a premium web-based terminal OS.
+
+  \x1b[1;35mComputer Engineering Student\x1b[0m @ CSPIT, CHARUSAT
+  - Deep diving into core engineering principles and software architecture.`,
+
+  skills: `
+  \x1b[1;32mStack:\x1b[0m     Full Stack Development, React, Node.js, Python
+  \x1b[1;32mAdvanced:\x1b[0m  Web3, AI Interfacing, Smart Contracts
+  \x1b[1;32mSystems:\x1b[0m   Docker, Git, Linux, Cloud Deployments`,
+
+  contact: `
+  \x1b[1;33mEmail:\x1b[0m     dkc074837@gmail.com
+  \x1b[1;33mMobile:\x1b[0m    +919428280245
+  \x1b[1;33mGitHub:\x1b[0m    github.com/chauhand2463`,
+
+  projects: `
+  1. \x1b[1;34mChauhanOS\x1b[0m - Premium portfolio OS
+  2. \x1b[1;34mHolo-Matrix\x1b[0m - 3D visual engine
+  3. \x1b[1;34mNexus AI\x1b[0m - LLM collaboration agent
+  4. \x1b[1;34mQuantum Ledger\x1b[0m - DeFi tracker`,
 };
 
 interface TerminalLine {
@@ -160,16 +187,10 @@ const TerminalApp = () => {
 
     const output = processCommand(input);
 
-    // Handle coloring for ls output and others if needed (basic simplified ansi strip or render)
-    // For now, react renders strings. usage of \x1b is just meta-data here, simple rendering needed.
-    // We can strip colors for now or implement a parser. Let's keep it simple text.
-
-    const cleanOutput = output?.replace(/\x1b\[[0-9;]*m/g, '') || '';
-
     setLines((prev) => [
       ...prev,
       { type: 'input', text: `dk@chauhan-os:${currentPath}$ ${input}` },
-      ...(output !== undefined ? [{ type: 'output' as const, text: cleanOutput }] : []),
+      ...(output !== undefined ? [{ type: 'output' as const, text: output }] : []),
     ]);
     setHistory((prev) => [input, ...prev]);
     setHistoryIndex(-1);
@@ -203,18 +224,39 @@ const TerminalApp = () => {
       onClick={() => inputRef.current?.focus()}
     >
       <div ref={scrollRef} className="flex-1 overflow-auto space-y-0.5 font-mono text-xs">
-        {lines.map((line, i) => (
-          <div
-            key={i}
-            className={
-              line.type === 'input'
-                ? 'text-primary'
-                : 'text-secondary-foreground whitespace-pre-wrap'
-            }
-          >
-            {line.text}
-          </div>
-        ))}
+        {lines.map((line, i) => {
+          if (line.type === 'input') {
+            return (
+              <div key={i} className="text-primary">
+                {line.text}
+              </div>
+            );
+          }
+
+          // Simple ANSI to React formatter
+          const parts = line.text.split(/(\x1b\[[0-9;]*m)/);
+          let currentColor = 'text-secondary-foreground';
+
+          return (
+            <div key={i} className="whitespace-pre-wrap leading-relaxed">
+              {parts.map((part, j) => {
+                const match = part.match(/\x1b\[([0-9;]*)m/);
+                if (match) {
+                  const code = match[1];
+                  if (code === '0') currentColor = 'text-secondary-foreground';
+                  else if (code.includes('31')) currentColor = 'text-red-400';
+                  else if (code.includes('32')) currentColor = 'text-green-400';
+                  else if (code.includes('33')) currentColor = 'text-yellow-400';
+                  else if (code.includes('34')) currentColor = 'text-blue-400';
+                  else if (code.includes('35')) currentColor = 'text-purple-400';
+                  else if (code.includes('36')) currentColor = 'text-cyan-400';
+                  return null;
+                }
+                return <span key={j} className={currentColor}>{part}</span>;
+              })}
+            </div>
+          );
+        })}
       </div>
 
       <form onSubmit={handleSubmit} className="flex items-center gap-1 mt-2 font-mono text-xs">

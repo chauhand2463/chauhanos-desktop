@@ -22,9 +22,9 @@ const ResumeApp = () => {
       {/* Fake resume preview */}
       <div className="border border-border rounded-lg p-5 bg-secondary/20 space-y-4">
         <div className="text-center space-y-1">
-          <h2 className="font-display text-lg font-bold text-primary">Dk Chauhan</h2>
-          <p className="text-[10px] text-muted-foreground">Frontend Developer • India</p>
-          <p className="text-[10px] text-muted-foreground">dk@chauhan.dev • github.com/dkchauhan</p>
+          <h2 className="font-display text-lg font-bold text-primary">Dhairy Chauhan</h2>
+          <p className="text-[10px] text-muted-foreground">Full Stack Developer • India</p>
+          <p className="text-[10px] text-muted-foreground">dkc074837@gmail.com • +919428280245</p>
         </div>
 
         <div className="border-t border-border pt-3 space-y-3">
@@ -34,7 +34,7 @@ const ResumeApp = () => {
           </Section>
 
           <Section title="Skills">
-            React • TypeScript • JavaScript • Tailwind CSS • HTML/CSS • Git • Node.js • C Programming
+            React • TypeScript • Node.js • Python • Full Stack Dev • Web3 • AI • Tailwind CSS
           </Section>
 
           <Section title="Experience">
@@ -47,8 +47,8 @@ const ResumeApp = () => {
           </Section>
 
           <Section title="Education">
-            <p className="text-xs text-secondary-foreground">Computer Science</p>
-            <p className="text-[10px] text-muted-foreground">University • 2024</p>
+            <p className="text-xs text-secondary-foreground font-semibold">Computer Engineering</p>
+            <p className="text-[10px] text-muted-foreground">Charotar University (CHARUSAT) - CSPIT • Present</p>
           </Section>
         </div>
       </div>
